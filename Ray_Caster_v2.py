@@ -41,7 +41,6 @@ def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords o
 
 def GetDist(PointArray, cam_cords):
         #does not yet account for intercetions with outher lines
-        #or camera cords
     RayList = []
     for point in PointArray:
         x = point[0]
@@ -86,8 +85,7 @@ def Render(map):
     plt.plot(x)
     plt.show()
 
-line = [3,6]
-ypos = 5
+
 obj_res = 10
 
 cam_cords = [20,20]
