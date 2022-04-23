@@ -1,19 +1,20 @@
-#the aim of this is to reduce render times, eliminate artifacts seen in prev version
+
 
 import math
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords of a line
-                                        #this only works on a 1D line (non angle), dont know if im going to change this
+                                        #this only works on a non-angled line, dont know if im going to change this
     print('creating point array')
     
     if(line[0][0] == line[1][0]):       #if x=x
         print('x==x')
         lineY1 = line[0][1]*obj_res
         lineY2 = line[1][1]*obj_res
+
+        print(lineY1, lineY2)
 
         PointArray = []
         for i in range(lineY1, lineY2):
@@ -27,7 +28,6 @@ def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords o
 
         lineX1 = line[0][0]*obj_res
         lineX2 = line[1][0]*obj_res
-
         print(lineX1, lineX2)
 
         PointArray = []                 #create points in range of the inital conditions
@@ -41,6 +41,7 @@ def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords o
 
 def GetDist(PointArray, cam_cords):
         #does not yet account for intercetions with outher lines
+
     RayList = []
     for point in PointArray:
         x = point[0]
@@ -60,9 +61,9 @@ def GetAngle(opp, adj):
     angle = math.atan2(opp, adj)
     return math.degrees(angle)
 
-def RayToDistanceList(RayList, fov, res):
+def RayToDistanceList(RayList, Viewable, res):        #now supports camera rotation
     DistanceList = []
-    for ang in range(fov*res):
+    for ang in range(Viewable[0]*res, Viewable[1]*res):
         angle = ang/res
         found = False
 
@@ -80,28 +81,36 @@ def RayToDistanceList(RayList, fov, res):
 def Render(map):
     plt.rcParams["figure.figsize"] = [7.50, 3.50]
     plt.rcParams["figure.autolayout"] = True
-    x = np.array(map)
     plt.title("Line graph")
-    plt.plot(x)
+    plt.plot(map)   
     plt.show()
 
+obj_res = 1
 
-obj_res = 10
-
-cam_cords = [20,20]
-FOV = 90
+cam_cords = [32,32]
+FOV = [1,90]
 RES = 100
 
-line1 = [[3,6],[3,9]]
-line2 = [[3,6],[6,6]]
-pointlist1 = CreatePointArray(line1, obj_res)
-pointlist2 = CreatePointArray(line2, obj_res)
 
-pointlist = pointlist1 + pointlist2
+#boundary
+TopLeft = [0, 64]
+TopRight = [64, 64]
 
-for x in range(20):
-    cord = [x, 20]
+BottomLeft = [0, 0]
+BottomRight = [64, 0]
 
-    RayList = GetDist(pointlist, cord)
-    DistanceList = RayToDistanceList(RayList, FOV, RES)
+Top = CreatePointArray([TopLeft, TopRight], obj_res)
+print([TopLeft, TopRight])
+
+Bottom = CreatePointArray([BottomLeft, BottomRight], obj_res)
+print([BottomLeft, BottomRight])
+
+bounds = Top + Bottom 
+
+
+for angle in range(180):
+    rot = [FOV[0]+angle, FOV[1]+angle]
+
+    RayList = GetDist(bounds, cam_cords)
+    DistanceList = RayToDistanceList(RayList, rot, RES)
     Render(DistanceList)
