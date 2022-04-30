@@ -9,5 +9,5 @@ this is done to have an output that is not just the object.
 then, after all of this, its rendered via matplotlib (i did the worst crime imagenable (stealing code) to get this to work).      
 
 # limitations
-evreything is "transparent"    <= working on it
+evreything is "transparent"    <= working on it            
 currently only outputs a animation of the camera rotating
