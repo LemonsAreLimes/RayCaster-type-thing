@@ -1,9 +1,8 @@
-
-
-import math
-
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 import numpy as np
+import math
+import time         #going to be used for calculating render times
 
 def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords of a line
                                         #this only works on a non-angled line, dont know if im going to change this
@@ -40,8 +39,6 @@ def CreatePointArray(line, obj_res):    #this will return the 'non-real' cords o
         print('not devloped yet')
 
 def GetDist(PointArray, cam_cords):
-        #does not yet account for intercetions with outher lines
-
     RayList = []
     for point in PointArray:
         x = point[0]
@@ -61,7 +58,7 @@ def GetAngle(opp, adj):
     angle = math.atan2(opp, adj)
     return math.degrees(angle)
 
-def RayToDistanceList(RayList, Viewable, res):        #now supports camera rotation
+def RayToDistanceList(RayList, Viewable, res):
     DistanceList = []
     for ang in range(Viewable[0]*res, Viewable[1]*res):
         angle = ang/res
@@ -85,12 +82,32 @@ def Render(map):
     plt.plot(map)   
     plt.show()
 
+def RenderAnim(obj, cam_cords, res):
+    fig = plt.figure(figsize=(6,6))
+
+    RayList = GetDist(obj, cam_cords)
+
+    def animation_func(i):
+        plt.clf()
+        plt.ylim(0,100)
+
+        rot = [FOV[0]+i, FOV[1]+i]
+
+        DistanceList = RayToDistanceList(RayList, rot, res)
+
+        plt.title(f"Frame: {i}, Angle: 90+{i}")
+        plt.plot(DistanceList)
+    
+    animation = FuncAnimation(fig, animation_func, interval = 1)
+    plt.show()
+
+
+#configurations
+FOV = [0,90]
+RES = 100
 obj_res = 1
 
 cam_cords = [32,32]
-FOV = [1,90]
-RES = 100
-
 
 #boundary
 TopLeft = [0, 64]
@@ -100,17 +117,16 @@ BottomLeft = [0, 0]
 BottomRight = [64, 0]
 
 Top = CreatePointArray([TopLeft, TopRight], obj_res)
-print([TopLeft, TopRight])
-
 Bottom = CreatePointArray([BottomLeft, BottomRight], obj_res)
-print([BottomLeft, BottomRight])
 
 bounds = Top + Bottom 
 
+RenderAnim(bounds, cam_cords, RES)
 
-for angle in range(180):
-    rot = [FOV[0]+angle, FOV[1]+angle]
+# for angle in range(180):
+#     rot = [FOV[0]+angle, FOV[1]+angle]
 
-    RayList = GetDist(bounds, cam_cords)
-    DistanceList = RayToDistanceList(RayList, rot, RES)
-    Render(DistanceList)
+#     RayList = GetDist(bounds, cam_cords)
+#     DistanceList = RayToDistanceList(RayList, rot, RES)
+#     Render(DistanceList)
+
