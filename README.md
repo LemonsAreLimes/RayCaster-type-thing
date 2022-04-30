@@ -9,5 +9,5 @@ this is done to have an output that is not just the object.
 then, after all of this, its rendered via matplotlib (i did the worst crime imagenable (stealing code) to get this to work).      
 
 # limitations
+evreything is "transparent"
 output misses angles leaving white areas.      
-renders 1 frame at a time with current setup.     <- working on it
