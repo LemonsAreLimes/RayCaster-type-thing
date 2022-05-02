@@ -179,12 +179,22 @@ def Render(map):
     plt.plot(map)   
     plt.show()
 
-def RenderAnim(obj, cam_cords, res):
-    fig = plt.figure(figsize=(6, 3))
+def RenderAnim(obj, cam_cords, res, frame_cap=None):
+    fig = plt.figure(figsize=(6, 2.5))
+
+    codeTimeList = []
 
     RayList = GetDist(obj, cam_cords)
 
     def animation_func(i):
+        codeTimeStart = time.perf_counter()
+
+        if i == frame_cap-1:               #slightly more elagant way of closing the animation
+            plt.close()
+            print('done animation')
+            print('please, plot this infromation manually:')
+            print(codeTimeList)
+
         plt.clf()
         plt.ylim(0,100)
 
@@ -193,11 +203,20 @@ def RenderAnim(obj, cam_cords, res):
         DistanceList = CamViewable(RayList, rot, res)
         output = smooth_cam_output(DistanceList)
 
-        plt.title(f"Frame: {i}, Angle: 90+{i}")
+        if len(codeTimeList) != 0:          #calculates frame time average
+            codeTimeAVG = round((sum(codeTimeList) / len(codeTimeList)), 4)
+        else:
+            codeTimeAVG = 0
+
+        plt.title(f"Frame: {i}, Angle: 90+{i}, Avg render time (ms):{codeTimeAVG}")
         plt.plot(output)
-    
-    animation = FuncAnimation(fig, animation_func, interval = 1)
+
+        codeTimeEnd = time.perf_counter()
+        codeTimeList.append(codeTimeEnd - codeTimeStart)
+
+    anim = animation.FuncAnimation(fig, animation_func, frames=frame_cap, interval = 1, repeat=False)
     plt.show()
+
 
 
 
