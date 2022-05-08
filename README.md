@@ -10,8 +10,6 @@ object data is then interpolated to give a smooth render.
 then, after all of this, its rendered via pyplot.          
 
 # limitations
-evreything is "transparent"    <= working on it            
-currently only outputs a animation of the camera rotating           
-no way of moving the camera while rendering              
-only renders 1 object (line) at a time, havent tested with it but it will most likey mess a bunch of things up    <= also working on it                
+evreything is "transparent"    <= i lied im not working on it                              
+no movement (yet)    <= working on it                   
        
