@@ -218,15 +218,80 @@ def RenderAnim(obj, cam_cords, res, frame_cap=None):
     plt.show()
 
 
+def AnimRender2(obj, cam_cords, fov, res, returnInfo=True):
+    codeTimeList = []
+    i = 0
+
+    Raylist = GetDist(obj, cam_cords)
+    rot = fov
+    
+    while True:
+        i+=1
+
+            #keyboard input (only used for rotation and exiting currently)
+        if keyboard.read_key() == 'e':
+            rot = [rot[0]+1, rot[1]+1]
+
+        elif keyboard.read_key() == 'q':
+            rot = [rot[0]-1, rot[1]-1]
+
+        elif keyboard.read_key() == 'esc':
+            plt.close()
+            print('closed the window')
+
+            if returnInfo:
+                print(codeTimeList)
+                plt.title('Render time')
+                plt.ylabel('Speed')
+                plt.xlabel('Frame')
+                plt.plot(codeTimeList)
+                plt.show()
+                return
+            else:
+                return
+
+            #starts timer now because keyboard.read_key() pauses the loop untill something is pressed >:/
+        codeTimeStart = time.perf_counter()
+
+            #resets rotation 'seamlessly'
+        if rot[1] >= 360:
+            rot = fov 
+        if rot[0] <= 0:
+            rot = [360-fov[1], 360]
+
+
+        
+        
+        if len(codeTimeList) != 0:          #calculates frame time average
+            codeTimeAVG = round((sum(codeTimeList) / len(codeTimeList)), 4)
+        else:
+            codeTimeAVG = 0
+
+            #does some calculations or something idk
+        # Raylist = GetDist(obj, cam_cords)
+        DistanceList = CamViewable(Raylist, rot, res)
+        output = smooth_cam_output(DistanceList)
+
+            #sets up the window: fix y value, turn axis off, set title. 
+        plt.ylim(0,100); plt.axis('off')     
+        plt.title(f"Frame: {i}, Angle:{rot}, Avg render time (ms):{codeTimeAVG}")
+        
+        plt.plot(output)
+        plt.draw(); plt.pause(0.0001); plt.clf()    #this somehow makes it an animation
+
+        codeTimeEnd = time.perf_counter() 
+        codeTimeList.append(codeTimeEnd - codeTimeStart)
 
 
 
-#config
-RES = 100
+
+
 obj_res = 1
 
-FOV = [1,90]
 cam_cords = [32,32]
+FOV = [1,90]
+RES = 100
+
 
 #boundary
 TopLeft = [0, 64]
@@ -243,12 +308,14 @@ BottomRight = [64, 0]
 Top = CreatePointArray([TopLeft, TopRight], obj_res)
 print([TopLeft, TopRight])
 
-# Bottom = CreatePointArray([BottomLeft, BottomRight], obj_res)
-# print([BottomLeft, BottomRight])
+Bottom = CreatePointArray([BottomLeft, BottomRight], obj_res)
+print([BottomLeft, BottomRight])
 
-bounds = Top
+bounds = Top 
+print('press e for positive roation, press q for negative roation')
 
-RenderAnim(bounds, cam_cords, RES)
+    # obj, cam_cords, fov, res, returnInfo
+AnimRender2(bounds, cam_cords, FOV, RES, True)
 
 # for angle in range(180):
 #     rot = [FOV[0]+angle, FOV[1]+angle]
@@ -256,4 +323,6 @@ RenderAnim(bounds, cam_cords, RES)
 #     RayList = GetDist(bounds, cam_cords)
 #     DistanceList = RayToDistanceList(RayList, rot, RES)
 #     Render(DistanceList)
+
+
 
