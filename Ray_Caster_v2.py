@@ -221,19 +221,28 @@ def RenderAnim(obj, cam_cords, res, frame_cap=None):
 def AnimRender2(obj, cam_cords, fov, res, returnInfo=True):
     codeTimeList = []
     i = 0
-
-    Raylist = GetDist(obj, cam_cords)
     rot = fov
-    
+
     while True:
         i+=1
 
-            #keyboard input (only used for rotation and exiting currently)
-        if keyboard.read_key() == 'e':
-            rot = [rot[0]+1, rot[1]+1]
+        keypress = keyboard.read_key()
 
-        elif keyboard.read_key() == 'q':
-            rot = [rot[0]-1, rot[1]-1]
+            #position input
+        if keypress == 'w':         #y+
+            cam_cords = [cam_cords[0], cam_cords[1]+1]
+        if keypress == 's':         #y-
+            cam_cords = [cam_cords[0], cam_cords[1]-1]
+        if keypress == 'd':         #x+
+            cam_cords = [cam_cords[0]+1, cam_cords[1]]
+        if keypress == 'a':         #x-
+            cam_cords = [cam_cords[0]-1, cam_cords[1]-1]
+
+            #Rotation input
+        if keypress == 'e':         #rot+
+            rot = [rot[0]+5, rot[1]+5]
+        if keypress == 'q':       #rot-
+            rot = [rot[0]-5, rot[1]-5]
 
         elif keyboard.read_key() == 'esc':
             plt.close()
@@ -260,15 +269,13 @@ def AnimRender2(obj, cam_cords, fov, res, returnInfo=True):
             rot = [360-fov[1], 360]
 
 
-        
-        
         if len(codeTimeList) != 0:          #calculates frame time average
             codeTimeAVG = round((sum(codeTimeList) / len(codeTimeList)), 4)
         else:
             codeTimeAVG = 0
 
             #does some calculations or something idk
-        # Raylist = GetDist(obj, cam_cords)
+        Raylist = GetDist(obj, cam_cords)
         DistanceList = CamViewable(Raylist, rot, res)
         output = smooth_cam_output(DistanceList)
 
@@ -281,6 +288,8 @@ def AnimRender2(obj, cam_cords, fov, res, returnInfo=True):
 
         codeTimeEnd = time.perf_counter() 
         codeTimeList.append(codeTimeEnd - codeTimeStart)
+
+
 
 
 
@@ -312,7 +321,8 @@ Bottom = CreatePointArray([BottomLeft, BottomRight], obj_res)
 print([BottomLeft, BottomRight])
 
 bounds = Top 
-print('press e for positive roation, press q for negative roation')
+print('e = +rotation, q = -rotation')
+print('w = +x, a = -y, s = -x, d = +y')
 
     # obj, cam_cords, fov, res, returnInfo
 AnimRender2(bounds, cam_cords, FOV, RES, True)
