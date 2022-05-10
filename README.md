@@ -10,6 +10,7 @@ object data is then interpolated to give a smooth render.
 then, after all of this, its rendered via pyplot.          
 
 # limitations
-evreything is "transparent"    <= i lied im not working on it                              
-no movement (yet)    <= working on it                   
-       
+evreything is "transparent" => only rendering one thing at a time                             
+movement is independant of camera rotaion               
+the whole thing disappears sometimes (i dont know why)                
+the further you move away from the object the larger it becomes (not exactly sure how to fix this)                     
