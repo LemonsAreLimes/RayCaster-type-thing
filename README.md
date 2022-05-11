@@ -1,16 +1,34 @@
-# RayCasterV2Test
+# RayCasterV3
 not really a ray caster but renders simmilar to one 
+vertex caster might be a better name
 
 # how does it work?
-creates a bunch of points from 2 endpoints.     
-the distance (hypotenuse, via x,y positions) of each point from the camera is logged.     
-the angle extracted from the triangle and is used as an index for where the object is.     
-this is done to have an output that is not just the object.     
-object data is then interpolated to give a smooth render.          
-then, after all of this, its rendered via pyplot.          
+```
+#quick rundown
+    #TriangluatePoint / Createline             <= manupulated for position
+        #create 2 vertex at cords
+        #find: dist from camera and angle
+        #TriangluatePoint returns [angle, distance]
+        #CreateLine returns [[angle, distance], [angle, distance]]
 
+    #ToDistanceList                            <= manupulated for rotation
+        #determine if any part of the object is in view, if so:
+        #add rays to the distancelist                           [0,0,1,0,0,2,0,0]                  ----|
+        #interpolate the 2 distances                            [0,0,1,0,0,2,0,0] => [1,1.25,1.75,2]   |
+        #add the interpolated list into the distance list       [0,0,1,1.25,1.75,2,0,0]                |  = Distance List
+        #chop off data outside the feild of view                [0,0,1,1.25,1.75]                  ----|
+
+    #RenderLoop
+        #wait for input 
+        #reset camera rotation if needed 
+        #Createline
+        #ToDistanceList
+        #display data
+        #clear
+
+```
 # limitations
-evreything is "transparent" => only rendering one thing at a time                             
-movement is independant of camera rotaion               
-the whole thing disappears sometimes (i dont know why)                
+evreything is "transparent" => only rendering one thing at a time                                                           
 the further you move away from the object the larger it becomes (not exactly sure how to fix this)                     
+movement is independant of camera rotaion           
+cameras rotation resets oddly         
