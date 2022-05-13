@@ -54,9 +54,9 @@ def ToDistanceList(LineRay, fov, fovNum, angle_round):
             for ray in LineRay:
                 if round(ray[0], angle_round) == angle:
                     found = True
-                                            #fixes objects firther becoming larger
-                    dist = (1/(ray[1]))     #did not want to use a fixed value
-                    DistanceList.append(ray[1])
+
+                    #fixes objects further becoming larger and objects close becoming super big
+                    DistanceList.append(res-ray[1])
                     RayPos.append(pos)
                     break
             
