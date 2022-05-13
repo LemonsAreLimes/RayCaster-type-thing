@@ -54,6 +54,8 @@ def ToDistanceList(LineRay, fov, angle_round):
             for ray in LineRay:
                 if round(ray[0], angle_round) == angle:
                     found = True
+                                            #fixes objects firther becoming larger
+                    dist = (1/(ray[1]))     #did not want to use a fixed value
                     DistanceList.append(ray[1])
                     RayPos.append(pos)
                     break
@@ -158,7 +160,7 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
         output = ToDistanceList(Raylist, rot, angle_round)
 
             #sets up the window: fix y value, turn axis off, set title. 
-        plt.ylim(0,100); plt.axis('off')     
+        plt.ylim(0, 0.2); plt.axis('off')     
         plt.title(f"Frame: {i}, Angle:{rot}, Avg render time (ms):{codeTimeAVG}")
         
         plt.plot(output)
@@ -169,15 +171,10 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
 
 
 
-obj_res = 1
-
 cam_cords = [32, 32]
 FOV = [0,90]
 RES = 100
-
-
 obj = [[2, 9], [4, 15]]
-
 
 print('e = +rotation, q = -rotation')
 print('w = +x, a = -y, s = -x, d = +y')
