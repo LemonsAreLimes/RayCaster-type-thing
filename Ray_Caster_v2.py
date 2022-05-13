@@ -38,7 +38,7 @@ def SeeLine(line, camera_cords, angle_round):
     LineRay = [ray0, ray1]
     return LineRay
 
-def ToDistanceList(LineRay, fov, angle_round):
+def ToDistanceList(LineRay, fov, fovNum, angle_round):
     res = 1 * 10**angle_round
     DistanceList = []
     RayPos = []
@@ -88,8 +88,19 @@ def ToDistanceList(LineRay, fov, angle_round):
         #chop off the non viewable data
         ViewData = []
         for i in range(len(NewDistanceList)):
-            if i in range(fov[0]*res, fov[1]*res):
-                ViewData.append(NewDistanceList[i])
+            if fov[1] - fov[0] != fovNum: 
+                if i in range(0, fov[1]*res):
+                    ViewData.append(NewDistanceList[i])
+                elif i in range(fov[0]*res, 360*res):
+                    ViewData.append(NewDistanceList[i])
+            else:
+                if i in range(fov[0]*res, fov[1]*res):
+                    ViewData.append(NewDistanceList[i])
+
+        # ViewData = []
+        # for i in range(len(NewDistanceList)):
+        #     if i in range(fov[0]*res, fov[1]*res):
+        #         ViewData.append(NewDistanceList[i])
 
         return ViewData
 
@@ -116,12 +127,34 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
             cam_cords = [cam_cords[0]+1, cam_cords[1]]
         if keypress == 'a':         #x-
             cam_cords = [cam_cords[0]-1, cam_cords[1]-1]
-
             #Rotation input
         if keypress == 'e':         #rot+
-            rot = [rot[0]+1, rot[1]+1]
-        if keypress == 'q':       #rot-
-            rot = [rot[0]-1, rot[1]-1]
+            rot = [rot[0]+5, rot[1]+5]
+            
+                    #resets rotation 'seamlessly'
+            if rot[0] <= 0:
+                rot[0] = 360
+            elif rot[0] >= 360:
+                rot[0] = 0
+    
+            if rot[1] <= 0:
+                rot[1] = 360
+            elif rot[1] >= 360:
+                rot[1] = 0
+
+        if keypress == 'q':         #rot-
+            rot = [rot[0]-5, rot[1]-5]
+            
+                    #resets rotation 'seamlessly'
+            if rot[0] <= 0:
+                rot[0] = 360
+            elif rot[0] >= 360:
+                rot[0] = 0
+    
+            if rot[1] <= 0:
+                rot[1] = 360
+            elif rot[1] >= 360:
+                rot[1] = 0
 
         elif keyboard.read_key() == 'esc':
             plt.close()
@@ -140,14 +173,6 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
 
             #starts timer now because keyboard.read_key() pauses the loop untill something is pressed >:/
         codeTimeStart = time.perf_counter()
-
-            #resets rotation 'seamlessly'
-        if rot[1] > 360:
-            rot = fov 
-            print('rot=fov')
-        if rot[0] < 0:
-            print('reset 360')
-            rot = [360-fov[1], 360]
 
 
         if len(codeTimeList) != 0:          #calculates frame time average
@@ -179,6 +204,6 @@ obj = [[2, 9], [4, 15]]
 print('e = +rotation, q = -rotation')
 print('w = +x, a = -y, s = -x, d = +y')
 
-AnimRender2(obj, cam_cords, FOV, RES, angle_round=2, returnInfo=True)
+Play(obj, cam_cords, FOV, 90, angle_round=2, returnInfo=False)
 
 
