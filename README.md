@@ -29,6 +29,6 @@ vertex caster might be a better name
 ```
 # limitations
 evreything is "transparent" => only rendering one thing at a time                                                           
-the further you move away from the object the larger it becomes (not exactly sure how to fix this)                     
+if you go really vlose to the object it renders really really big           
 movement is independant of camera rotaion           
 cameras rotation resets oddly         
