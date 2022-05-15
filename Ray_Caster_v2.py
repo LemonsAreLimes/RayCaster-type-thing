@@ -38,75 +38,85 @@ def SeeLine(line, camera_cords, angle_round):
     LineRay = [ray0, ray1]
     return LineRay
 
-def ToDistanceList(LineRay, fov, fovNum, angle_round):
+def ToDistanceList(LineRay, direction, fov, angle_round):
     res = 1 * 10**angle_round
     DistanceList = []
     RayPos = []
 
         #checks if the full object is in the fov (should speed it up a bit hopefully)
-    if int(LineRay[0][0]) in range(fov[0], fov[1]) or int(LineRay[1][0]) in range(fov[0], fov[1]):
+    # if int(LineRay[0][0]) in range(fov[0], fov[1]) or int(LineRay[1][0]) in range(fov[0], fov[1]):
 
-        #add rays to the DistanceList (without cutting out non viewable)
-        for pos in range(0, 360*res):
-            angle = pos/res
-            found = False
 
-            for ray in LineRay:
-                if round(ray[0], angle_round) == angle:
-                    found = True
+    #add rays to the DistanceList (without cutting out non viewable)
+    for pos in range(0, 360*res):
+        angle = pos/res
+        found = False
 
-                    #fixes objects further becoming larger and objects close becoming super big
-                    DistanceList.append(res-ray[1])
-                    RayPos.append(pos)
-                    break
-            
-            if found == False:
-                DistanceList.append(0)
+        for ray in LineRay:
+            if round(ray[0], angle_round) == angle:
+                found = True
+                #fixes objects firther becoming larger
+                DistanceList.append(res-ray[1])
+                RayPos.append(pos)
+                break
+        
+        if found == False:
+            DistanceList.append(0)
 
-        print(RayPos)
-        print(len(DistanceList))
+    #interpolate distance
+    start = DistanceList[RayPos[0]]
+    end = DistanceList[RayPos[1]]
+    diff = RayPos[1] - RayPos[0]
+    InterpolatedRayDistance = np.linspace(start, end, diff).tolist()
 
-        #interpolate distance
-        start = DistanceList[RayPos[0]]
-        end = DistanceList[RayPos[1]]
-        diff = RayPos[1] - RayPos[0]
-        InterpolatedRayDistance = np.linspace(start, end, diff).tolist()
+    #add interpolated ray distance into the DistanceList
+    NewDistanceList = []
+    for i in range(len(DistanceList)):
+        if i in range(RayPos[0]+10, RayPos[1]+10):
+            newnumber = i - RayPos[0]
+            try:
+                NewDistanceList.append(InterpolatedRayDistance[newnumber])
+            except IndexError:
+                pass
 
-        #add interpolated ray distance into the DistanceList
-        NewDistanceList = []
-        for i in range(len(DistanceList)):
-            if i in range(RayPos[0]+10, RayPos[1]+10):
-                newnumber = i - RayPos[0]
-                try:
-                    NewDistanceList.append(InterpolatedRayDistance[newnumber])
-                except IndexError:
-                    print()
+        else:
+            NewDistanceList.append(0)
 
-            else:
-                NewDistanceList.append(0)
+    #chop off the non viewable data
+    ViewData = []
+    if direction + fov > 360 or direction - fov < 0:
+        if direction - fov <0:
+            high = (direction - fov) + 360
+        else:
+            high = direction - fov 
 
-        #chop off the non viewable data
-        ViewData = []
-        for i in range(len(NewDistanceList)):
-            if fov[1] - fov[0] != fovNum: 
-                if i in range(0, fov[1]*res):
-                    ViewData.append(NewDistanceList[i])
-                elif i in range(fov[0]*res, 360*res):
-                    ViewData.append(NewDistanceList[i])
-            else:
-                if i in range(fov[0]*res, fov[1]*res):
-                    ViewData.append(NewDistanceList[i])
+        if direction + fov > 360:
+            low = (direction + fov) - 360
+        else:
+            low = direction + fov
 
-        # ViewData = []
-        # for i in range(len(NewDistanceList)):
-        #     if i in range(fov[0]*res, fov[1]*res):
-        #         ViewData.append(NewDistanceList[i])
+        for x in range(high*res, 360*res):
+            try:
+                ViewData.append(NewDistanceList[x])
+            except IndexError:
+                pass
 
-        return ViewData
-
+        for y in range(0, low*res):
+            try:
+                ViewData.append(NewDistanceList[y])
+            except IndexError:
+                pass
     else:
-        print('full object not in view')
-        return False
+        high = direction + fov
+        low = direction - fov
+        for i in range(low*res, high*res):
+            try:
+                ViewData.append(NewDistanceList[i])
+            except IndexError:
+                pass
+
+    return ViewData
+
 
 def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
     codeTimeList = []
