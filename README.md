@@ -30,4 +30,5 @@ vertex caster might be a better name
 # limitations
 evreything is "transparent" => only rendering one thing at a time                                                              
 movement is independant of camera rotaion           
-object in render gets stuck when rotating left (crossing over 360) <= no clue how to fix this
+
+
