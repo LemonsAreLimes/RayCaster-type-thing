@@ -43,10 +43,6 @@ def ToDistanceList(LineRay, direction, fov, angle_round):
     DistanceList = []
     RayPos = []
 
-        #checks if the full object is in the fov (should speed it up a bit hopefully)
-    # if int(LineRay[0][0]) in range(fov[0], fov[1]) or int(LineRay[1][0]) in range(fov[0], fov[1]):
-
-
     #add rays to the DistanceList (without cutting out non viewable)
     for pos in range(0, 360*res):
         angle = pos/res
@@ -207,13 +203,14 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
 
 
 cam_cords = [32, 32]
-FOV = [0,90]
-RES = 100
 obj = [[2, 9], [4, 15]]
+
+feild_of_view = 45      #is actually 90 but halfed because maths
+direction = 0
 
 print('e = +rotation, q = -rotation')
 print('w = +x, a = -y, s = -x, d = +y')
 
-Play(obj, cam_cords, FOV, 90, angle_round=2, returnInfo=False)
+Play(obj, cam_cords, fov=feild_of_view, direction=direction, angle_round=2, returnInfo=True)
 
 
