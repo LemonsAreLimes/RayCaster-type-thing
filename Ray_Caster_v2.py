@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+import keyboard
 import numpy as np
 import math
-import time         
+import time
+
 
 
 def triangulatePoint(point, camera_cords, angle_round):
@@ -25,6 +26,7 @@ def triangulatePoint(point, camera_cords, angle_round):
     data = [angleRounded, hyp]
     return data
 
+
 def SeeLine(line, camera_cords, angle_round):
     point0 = line[0]
     point1 = line[1]
@@ -38,10 +40,15 @@ def SeeLine(line, camera_cords, angle_round):
     LineRay = [ray0, ray1]
     return LineRay
 
+
 def ToDistanceList(LineRay, direction, fov, angle_round):
     res = 1 * 10**angle_round
     DistanceList = []
     RayPos = []
+
+        #checks if the full object is in the fov (should speed it up a bit hopefully)
+    # if int(LineRay[0][0]) in range(fov[0], fov[1]) or int(LineRay[1][0]) in range(fov[0], fov[1]):
+
 
     #add rays to the DistanceList (without cutting out non viewable)
     for pos in range(0, 360*res):
@@ -114,53 +121,74 @@ def ToDistanceList(LineRay, direction, fov, angle_round):
     return ViewData
 
 
-def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
+def reset_angle(angle):
+    if angle >= 360:
+        angle = 0
+    elif angle <= 0:
+        angle = 360
+    return angle
+
+def change_rotation(angle, key):
+    if key == 'e':         #rot+
+        direction = reset_angle(angle+5)
+        return direction
+
+    elif key == 'q':         #rot-
+        direction = reset_angle(angle-5)
+        return direction
+
+    else:
+        print('no key recognized in change rotaiton')
+
+def change_position(angle, key, pos):
+    movement_constant = 5
+                                        #movement
+    if key == 'w':          #forward
+        x = math.sin(math.radians(angle)) * movement_constant
+        y = math.cos(math.radians(angle)) * movement_constant
+        cam_cords = [pos[0] + x, pos[1] + y]
+        return cam_cords
+
+    elif key == 's':          #backward
+        x = math.sin(math.radians(angle)) * movement_constant
+        y = math.cos(math.radians(angle)) * movement_constant
+        cam_cords = [pos[0] - x, pos[1] - y]
+        return cam_cords    
+
+    elif key == 'd':          #right
+        angle = reset_angle(angle-90)
+        x = math.sin(math.radians(angle)) * movement_constant
+        y = math.cos(math.radians(angle)) * movement_constant
+        cam_cords = [pos[0] - x, pos[1] - y]
+        return cam_cords    
+        
+    elif key == 'a':          #left
+        angle = reset_angle(angle-90)
+        x = math.sin(math.radians(angle)) * movement_constant
+        y = math.cos(math.radians(angle)) * movement_constant
+        cam_cords = [pos[0] + x, pos[1] + y]
+        return cam_cords    
+
+    else:
+        print('no key recognized in change position')
+
+
+def Play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
     codeTimeList = []
     i = 0
-    rot = fov
 
     while True:
         i+=1
 
         keypress = keyboard.read_key()
+        if keypress in ['q', 'e']:
+            direction = change_rotation(direction, keypress)
+        
+        elif keypress in ['w','a','s','d']:
+            cam_cords = change_position(direction, keypress, cam_cords)
 
-            #position input
-        if keypress == 'w':         #y+
-            cam_cords = [cam_cords[0], cam_cords[1]+1]
-        if keypress == 's':         #y-
-            cam_cords = [cam_cords[0], cam_cords[1]-1]
-        if keypress == 'd':         #x+
-            cam_cords = [cam_cords[0]+1, cam_cords[1]]
-        if keypress == 'a':         #x-
-            cam_cords = [cam_cords[0]-1, cam_cords[1]-1]
-            #Rotation input
-        if keypress == 'e':         #rot+
-            rot = [rot[0]+5, rot[1]+5]
-            
-                    #resets rotation 'seamlessly'
-            if rot[0] <= 0:
-                rot[0] = 360
-            elif rot[0] >= 360:
-                rot[0] = 0
-    
-            if rot[1] <= 0:
-                rot[1] = 360
-            elif rot[1] >= 360:
-                rot[1] = 0
-
-        if keypress == 'q':         #rot-
-            rot = [rot[0]-5, rot[1]-5]
-            
-                    #resets rotation 'seamlessly'
-            if rot[0] <= 0:
-                rot[0] = 360
-            elif rot[0] >= 360:
-                rot[0] = 0
-    
-            if rot[1] <= 0:
-                rot[1] = 360
-            elif rot[1] >= 360:
-                rot[1] = 0
+        elif keypress == 'r':
+            cam_cords = [0,0]
 
         elif keyboard.read_key() == 'esc':
             plt.close()
@@ -177,23 +205,25 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
             else:
                 return
 
-            #starts timer now because keyboard.read_key() pauses the loop untill something is pressed >:/
+
+
         codeTimeStart = time.perf_counter()
 
-
-        if len(codeTimeList) != 0:          #calculates frame time average
+            #calculates frame time average
+        if len(codeTimeList) != 0:          
             codeTimeAVG = round((sum(codeTimeList) / len(codeTimeList)), 4)
         else:
             codeTimeAVG = 0
 
             #does some calculations or something idk
         Raylist = SeeLine(obj, cam_cords, angle_round)
-        output = ToDistanceList(Raylist, rot, angle_round)
+        output = ToDistanceList(Raylist, direction, fov, angle_round)
 
             #sets up the window: fix y value, turn axis off, set title. 
-        plt.ylim(0, 0.2); plt.axis('off')     
-        plt.title(f"Frame: {i}, Angle:{rot}, Avg render time (ms):{codeTimeAVG}")
-        
+        plt.ylim(0, 200) 
+        # plt.axis('off')     
+        plt.title(f"Frame: {i}, Rotation:{direction}, Pos:{int(cam_cords[0])} ,{int(cam_cords[1])}, Avg render time (ms):{codeTimeAVG}")
+         
         plt.plot(output)
         plt.draw(); plt.pause(0.0001); plt.clf()    #this somehow makes it an animation
 
@@ -201,16 +231,14 @@ def AnimRender2(obj, cam_cords, fov, res, angle_round, returnInfo=True):
         codeTimeList.append(codeTimeEnd - codeTimeStart)
 
 
-
-cam_cords = [32, 32]
+cam_cords = [0, 0]
 obj = [[2, 9], [4, 15]]
 
-feild_of_view = 45      #is actually 90 but halfed because maths
 direction = 0
+feild_of_view = 45      #is actually 90
 
 print('e = +rotation, q = -rotation')
 print('w = +x, a = -y, s = -x, d = +y')
 
-Play(obj, cam_cords, fov=feild_of_view, direction=direction, angle_round=2, returnInfo=True)
-
+Play(obj, cam_cords, fov=feild_of_view, direction=direction, angle_round=2, returnInfo=False)
 
