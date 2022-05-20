@@ -26,7 +26,6 @@ def triangulatePoint(point, camera_cords, angle_round):
     data = [angleRounded, hyp]
     return data
 
-
 def SeeLine(line, camera_cords, angle_round):
     point0 = line[0]
     point1 = line[1]
@@ -45,9 +44,6 @@ def ToDistanceList(LineRay, direction, fov, angle_round):
     res = 1 * 10**angle_round
     DistanceList = []
     RayPos = []
-
-        #checks if the full object is in the fov (should speed it up a bit hopefully)
-    # if int(LineRay[0][0]) in range(fov[0], fov[1]) or int(LineRay[1][0]) in range(fov[0], fov[1]):
 
 
     #add rays to the DistanceList (without cutting out non viewable)
@@ -120,6 +116,27 @@ def ToDistanceList(LineRay, direction, fov, angle_round):
 
     return ViewData
 
+def subRender(obj, cam_cords, direction, fov, angle_round):
+    lines = len(obj)
+
+    OutputList = []
+
+    for i in range(lines):
+        curent_line = obj[i]
+
+        Raylist = SeeLine(curent_line, cam_cords, angle_round)
+        output = ToDistanceList(Raylist, direction, fov, angle_round)
+
+            #overlays largest data 
+        if len(OutputList) == 0:
+            OutputList = output
+        else:
+            for i in range(len(output)):
+                if output[i] > OutputList[i]:
+                    OutputList[i] = output[i]
+
+    return OutputList
+
 
 def reset_angle(angle):
     if angle >= 360:
@@ -173,7 +190,7 @@ def change_position(angle, key, pos):
         print('no key recognized in change position')
 
 
-def Play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
+def play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
     codeTimeList = []
     i = 0
 
@@ -195,16 +212,13 @@ def Play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
             print('closed the window')
 
             if returnInfo:
+                print(f'Frames: {i}, Average render time: {sum(codeTimeList) / len(codeTimeList)}')
+                print('code time list data: ')
                 print(codeTimeList)
-                plt.title('Render time')
-                plt.ylabel('Speed')
-                plt.xlabel('Frame')
-                plt.plot(codeTimeList)
-                plt.show()
+                print()
                 return
             else:
                 return
-
 
 
         codeTimeStart = time.perf_counter()
@@ -215,13 +229,11 @@ def Play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
         else:
             codeTimeAVG = 0
 
-            #does some calculations or something idk
-        Raylist = SeeLine(obj, cam_cords, angle_round)
-        output = ToDistanceList(Raylist, direction, fov, angle_round)
+        output = subRender(obj, cam_cords, direction, fov, angle_round)
 
             #sets up the window: fix y value, turn axis off, set title. 
         plt.ylim(0, 200) 
-        # plt.axis('off')     
+        plt.axis('off')     
         plt.title(f"Frame: {i}, Rotation:{direction}, Pos:{int(cam_cords[0])} ,{int(cam_cords[1])}, Avg render time (ms):{codeTimeAVG}")
          
         plt.plot(output)
@@ -232,7 +244,7 @@ def Play(obj, cam_cords, direction, fov, angle_round, returnInfo=True):
 
 
 cam_cords = [0, 0]
-obj = [[2, 9], [4, 15]]
+obj = [[[5, 5], [5, 10]] , [[5,10], [15,10]] , [[15,10], [5,5]]]
 
 direction = 0
 feild_of_view = 45      #is actually 90
@@ -240,5 +252,5 @@ feild_of_view = 45      #is actually 90
 print('e = +rotation, q = -rotation')
 print('w = +x, a = -y, s = -x, d = +y')
 
-Play(obj, cam_cords, fov=feild_of_view, direction=direction, angle_round=2, returnInfo=False)
+play(obj, cam_cords, fov=feild_of_view, direction=direction, angle_round=2, returnInfo=True)
 
