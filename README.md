@@ -28,4 +28,6 @@ vertex caster might be a better name
 
 ```
 # limitations
-only renders one line                   
+gets really slow with alot of objects               
+directional movement is kinda messed up             
+crashes sometimes               
